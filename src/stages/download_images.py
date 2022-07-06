@@ -28,9 +28,7 @@ def _download_images(blobs,images_folder: str) -> pd.DataFrame:
     return df
 
 
-print("Download images")
 if __name__ == "__main__":
-    print("Entered if:")
     project_root = os.environ["DVC_ROOT"]
     params = dvc.api.params_show()
     config = get_config(params)

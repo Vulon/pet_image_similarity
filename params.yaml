@@ -6,3 +6,9 @@ cloud_storage:
 data:
   local_images_folder: "data/pet_images"
   classes_text_file: "data/text_info/classes.csv"
+  train_fracture: 0.7
+  val_fracture: 0.2
+  test_fracture: 0.1
+  train_classes_file: "data/text_info/train.csv"
+  val_classes_file: "data/text_info/val.csv"
+  test_classes_file: "data/text_info/test.csv"

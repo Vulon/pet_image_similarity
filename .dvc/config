@@ -1,0 +1,5 @@
+[core]
+    remote = google
+['remote "google"']
+    url = gs://pet_project/dvc
+    credentialpath = ../keys/google.json

@@ -10,3 +10,15 @@ stages:
     - path: data/text_info/classes.csv
       md5: c16de9772753450bccb88989e5283307
       size: 1361
+  split_data:
+    cmd: python src/stages/split_data.py
+    outs:
+    - path: data/text_info/test.csv
+      md5: 44c65a9b96f0c2df6a9ccd5e05fce318
+      size: 129
+    - path: data/text_info/train.csv
+      md5: f49559ccd36232b557e5255ef7aa6c3d
+      size: 1141
+    - path: data/text_info/val.csv
+      md5: 53c6e60f761f50fe906d025f4e988e53
+      size: 269

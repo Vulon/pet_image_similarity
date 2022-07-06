@@ -4,3 +4,9 @@ stages:
     outs:
       - data/pet_images
       - data/text_info/classes.csv
+  split_data:
+    cmd: python src/stages/split_data.py
+    outs:
+      - "data/text_info/train.csv"
+      - "data/text_info/val.csv"
+      - "data/text_info/test.csv"

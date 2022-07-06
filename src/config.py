@@ -13,6 +13,12 @@ class CloudStorageConfig:
 class DataConfig:
     local_images_folder: str
     classes_text_file: str
+    train_fracture: float
+    val_fracture: float
+    test_fracture: float
+    train_classes_file: str
+    val_classes_file: str
+    test_classes_file: str
 
 @dataclass
 class BaseConfig:
