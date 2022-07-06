@@ -1,0 +1,6 @@
+stages:
+  download_images:
+    cmd: python src/stages/download_images.py
+    outs:
+      - data/pet_images
+      - data/text_info/classes.csv

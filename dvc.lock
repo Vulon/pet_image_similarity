@@ -1,0 +1,12 @@
+schema: '2.0'
+stages:
+  download_images:
+    cmd: python src/stages/download_images.py
+    outs:
+    - path: data/pet_images
+      md5: 905eb90da29010e7a8e7ca1963225942.dir
+      size: 16974733
+      nfiles: 43
+    - path: data/text_info/classes.csv
+      md5: c16de9772753450bccb88989e5283307
+      size: 1361

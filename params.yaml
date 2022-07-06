@@ -1,0 +1,8 @@
+random_seed: 42
+cloud_storage:
+  credentials: keys/google.json
+  bucket_name: pet_project
+  images_folder: "pet_images"
+data:
+  local_images_folder: "data/pet_images"
+  classes_text_file: "data/text_info/classes.csv"
