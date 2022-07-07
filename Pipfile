@@ -19,6 +19,7 @@ google-cloud-storage = "*"
 pandas = "*"
 imgaug = "*"
 h5py = "*"
+transformers = "*"
 
 [dev-packages]
 ipykernel = "*"
