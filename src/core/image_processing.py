@@ -1,6 +1,7 @@
 from imgaug import augmenters as iaa
-
+from PIL import Image
 from src.config import AugmentationsConfig
+import numpy as np
 
 
 def create_crop_sequence(config: AugmentationsConfig) -> iaa.Augmenter:
@@ -88,3 +89,9 @@ def create_train_sequence(config: AugmentationsConfig) -> iaa.Augmenter:
         iaa.Sometimes(config.blur_probability, _create_blur_sequence(config)),
     ])
     return train_sequence
+
+
+def read_image(image_path: str):
+    image = Image.open(image_path)
+    image = np.uint8(np.array(image.getdata()).reshape((-1, image.width, 3)))
+    return image

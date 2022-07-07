@@ -6,7 +6,20 @@ stages:
       - data/text_info/classes.csv
   split_data:
     cmd: python src/stages/split_data.py
+    deps:
+      - data/text_info/classes.csv
     outs:
       - "data/text_info/train.csv"
       - "data/text_info/val.csv"
       - "data/text_info/test.csv"
+  convert_images_to_h5:
+    cmd: python src/stages/convert_images_to_hdf5.py
+    deps:
+      - data/pet_images
+      - "data/text_info/train.csv"
+      - "data/text_info/val.csv"
+      - "data/text_info/test.csv"
+    outs:
+      - "data/datasets/train.hdf5"
+      - "data/datasets/val.hdf5"
+      - "data/datasets/test.hdf5"

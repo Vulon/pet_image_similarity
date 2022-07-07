@@ -37,5 +37,5 @@ if __name__ == "__main__":
     df = _download_images(blobs, os.path.join(project_root, config.data.local_images_folder))
 
     os.makedirs( os.path.join(project_root, os.path.dirname(config.data.classes_text_file)), exist_ok=True )
-    df.to_csv(os.path.join(project_root, config.data.classes_text_file))
+    df.to_csv(os.path.join(project_root, config.data.classes_text_file), index=False)
     storage_client.close()

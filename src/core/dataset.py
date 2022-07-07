@@ -2,13 +2,13 @@ from torch.utils.data import Dataset
 import os
 from collections import Counter
 import random
+import pandas as pd
 
 
-class TripletLossDataset(Dataset):
+class ImageDataset(Dataset):
 
-    def __init__(self, images_folder_path: str, image_paths: list[str]):
+    def __init__(self, images_folder_path: str, image_paths: pd.DataFrame):
         """
-
         :param images_folder_path:
         :param image_paths: list with relative image paths: should be class_folder/image_name
         """
@@ -33,5 +33,4 @@ class TripletLossDataset(Dataset):
             # sample positive image
             positive_index = random.sample([i for i, item in enumerate(self.classes) if item == anchor_class], 1)
             self.image_paths[positive_index]
-
 

@@ -18,6 +18,7 @@ dvc = "*"
 google-cloud-storage = "*"
 pandas = "*"
 imgaug = "*"
+h5py = "*"
 
 [dev-packages]
 ipykernel = "*"

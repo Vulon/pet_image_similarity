@@ -4,21 +4,51 @@ stages:
     cmd: python src/stages/download_images.py
     outs:
     - path: data/pet_images
-      md5: 905eb90da29010e7a8e7ca1963225942.dir
-      size: 16974733
-      nfiles: 43
+      md5: 86736968c4c757aee0a0fa665d267985.dir
+      size: 16664989
+      nfiles: 42
     - path: data/text_info/classes.csv
-      md5: c16de9772753450bccb88989e5283307
-      size: 1361
+      md5: 57ae39496319993cbc98ad88694ed2dd
+      size: 1222
   split_data:
     cmd: python src/stages/split_data.py
+    deps:
+    - path: data/text_info/classes.csv
+      md5: 57ae39496319993cbc98ad88694ed2dd
+      size: 1222
     outs:
     - path: data/text_info/test.csv
-      md5: 44c65a9b96f0c2df6a9ccd5e05fce318
-      size: 129
+      md5: 6d649c2d88601852802306f2762f8cc6
+      size: 99
     - path: data/text_info/train.csv
-      md5: f49559ccd36232b557e5255ef7aa6c3d
-      size: 1141
+      md5: cfa9d9e8c4ea3ca8b963983ec0698c6c
+      size: 981
     - path: data/text_info/val.csv
-      md5: 53c6e60f761f50fe906d025f4e988e53
-      size: 269
+      md5: b2138faaf504f684bda0ae70a77b19ae
+      size: 166
+  convert_images_to_h5:
+    cmd: python src/stages/convert_images_to_hdf5.py
+    deps:
+    - path: data/pet_images
+      md5: 86736968c4c757aee0a0fa665d267985.dir
+      size: 16664989
+      nfiles: 42
+    - path: data/text_info/test.csv
+      md5: 6d649c2d88601852802306f2762f8cc6
+      size: 99
+    - path: data/text_info/train.csv
+      md5: cfa9d9e8c4ea3ca8b963983ec0698c6c
+      size: 981
+    - path: data/text_info/val.csv
+      md5: b2138faaf504f684bda0ae70a77b19ae
+      size: 166
+    outs:
+    - path: data/datasets/test.hdf5
+      md5: bc5f95cdaff7ed6169aa8f118d077b36
+      size: 596144
+    - path: data/datasets/train.hdf5
+      md5: f8232bc1448c8c7dca903d042d7749b3
+      size: 6508544
+    - path: data/datasets/val.hdf5
+      md5: f8e524591d48f889af53e084d703ee11
+      size: 1187840

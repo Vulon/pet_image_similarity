@@ -35,7 +35,7 @@ if __name__ == "__main__":
     test_df = df.loc[df['class'].isin(test_classes)]
     print("Desired portions:", config.data.train_fracture, config.data.val_fracture, config.data.test_fracture)
     print("Final portions:", train_df.shape[0] / total_count, val_df.shape[0] / total_count, test_df.shape[0] / total_count)
-    train_df.to_csv(os.path.join(project_root, config.data.train_classes_file))
-    val_df.to_csv(os.path.join(project_root, config.data.val_classes_file))
-    test_df.to_csv(os.path.join(project_root, config.data.test_classes_file))
+    train_df.to_csv(os.path.join(project_root, config.data.train_classes_file), index=False)
+    val_df.to_csv(os.path.join(project_root, config.data.val_classes_file), index=False)
+    test_df.to_csv(os.path.join(project_root, config.data.test_classes_file), index=False)
 

@@ -12,6 +12,10 @@ data:
   train_classes_file: "data/text_info/train.csv"
   val_classes_file: "data/text_info/val.csv"
   test_classes_file: "data/text_info/test.csv"
+  train_h5_file: "data/datasets/train.hdf5"
+  val_h5_file: "data/datasets/val.hdf5"
+  test_h5_file: "data/datasets/test.hdf5"
+
 augmentations:
   image_size: 256
   rotate_abs_angle: 25

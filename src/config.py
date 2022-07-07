@@ -19,6 +19,9 @@ class DataConfig:
     train_classes_file: str
     val_classes_file: str
     test_classes_file: str
+    train_h5_file: str
+    val_h5_file: str
+    test_h5_file: str
 
 @dataclass
 class AugmentationsConfig:
