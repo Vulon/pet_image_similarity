@@ -21,10 +21,34 @@ class DataConfig:
     test_classes_file: str
 
 @dataclass
+class AugmentationsConfig:
+    image_size: int
+    rotate_abs_angle: int
+    noise_lower_bound: int
+    noise_upper_bound: int
+    dropout_p: float
+    salt_and_pepper_p: float
+    blur_lower_kernel_bound: int
+    blur_upper_kernel_bound: int
+    jpeg_compression_bounds: tuple[int, int]
+    motion_blur_bounds: tuple[int, int]
+    gaussian_blur_bounds: tuple[float, float]
+    color_multiplier: tuple[float, float]
+    contrast_bounds: tuple[float, float]
+    clahe_clip_limit: tuple[float, float]
+
+    rotate_probability: float
+    arithmetic_probability: float
+    blur_probability: float
+    color_probability: float
+    contrast_probability: float
+
+@dataclass
 class BaseConfig:
     random_seed: int
     cloud_storage: CloudStorageConfig
     data: DataConfig
+    augmentations: AugmentationsConfig
 
 
 def __dataclass_from_dict(klass, d):

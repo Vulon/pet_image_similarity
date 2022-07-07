@@ -17,8 +17,11 @@ dvc = "*"
 "dvc[gs]" = "*"
 google-cloud-storage = "*"
 pandas = "*"
+imgaug = "*"
 
 [dev-packages]
+ipykernel = "*"
+notebook = "*"
 
 [requires]
 python_version = "3.10"

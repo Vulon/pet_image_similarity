@@ -12,3 +12,25 @@ data:
   train_classes_file: "data/text_info/train.csv"
   val_classes_file: "data/text_info/val.csv"
   test_classes_file: "data/text_info/test.csv"
+augmentations:
+  image_size: 256
+  rotate_abs_angle: 25
+  noise_lower_bound: 10
+  noise_upper_bound: 30
+  dropout_p: 0.01
+  salt_and_pepper_p: 0.03
+  blur_lower_kernel_bound: 1
+  blur_upper_kernel_bound: 5
+  jpeg_compression_bounds: [50, 80]
+  motion_blur_bounds: [3, 7]
+  gaussian_blur_bounds: [0, 3]
+  color_multiplier: [0.5, 1.5]
+  contrast_bounds: [0.7, 1.5]
+  clahe_clip_limit: [0.1, 4]
+
+
+  rotate_probability: 0.5
+  arithmetic_probability: 0.5
+  blur_probability: 0.5
+  color_probability: 0.5
+  contrast_probability: 0.5
