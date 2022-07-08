@@ -4,51 +4,138 @@ stages:
     cmd: python src/stages/download_images.py
     outs:
     - path: data/pet_images
-      md5: 86736968c4c757aee0a0fa665d267985.dir
-      size: 16664989
-      nfiles: 42
+      md5: f8709a2ce36664c8644b34a20eded199.dir
+      size: 62498402
+      nfiles: 141
     - path: data/text_info/classes.csv
-      md5: 57ae39496319993cbc98ad88694ed2dd
-      size: 1222
+      md5: b41b55d5515fa4e0c5da8ec29e6dfbd5
+      size: 4668
   split_data:
     cmd: python src/stages/split_data.py
     deps:
     - path: data/text_info/classes.csv
-      md5: 57ae39496319993cbc98ad88694ed2dd
-      size: 1222
+      md5: b41b55d5515fa4e0c5da8ec29e6dfbd5
+      size: 4668
+    params:
+      params.yaml:
+        data:
+          local_images_folder: data/pet_images
+          classes_text_file: data/text_info/classes.csv
+          train_fracture: 0.7
+          val_fracture: 0.2
+          test_fracture: 0.1
+          train_classes_file: data/text_info/train.csv
+          val_classes_file: data/text_info/val.csv
+          test_classes_file: data/text_info/test.csv
+          train_h5_file: data/datasets/train.hdf5
+          val_h5_file: data/datasets/val.hdf5
+          test_h5_file: data/datasets/test.hdf5
+          feature_extractor: microsoft/resnet-18
     outs:
     - path: data/text_info/test.csv
-      md5: 6d649c2d88601852802306f2762f8cc6
-      size: 99
+      md5: 7997a4e2650b05561c82f92647ab3dcb
+      size: 438
     - path: data/text_info/train.csv
-      md5: cfa9d9e8c4ea3ca8b963983ec0698c6c
-      size: 981
+      md5: dacb306cd2913cba464040f1ee609cc4
+      size: 3193
     - path: data/text_info/val.csv
-      md5: b2138faaf504f684bda0ae70a77b19ae
-      size: 166
+      md5: 5592658adb0e4fb43691af2c24fb8d31
+      size: 1061
   convert_images_to_h5:
     cmd: python src/stages/convert_images_to_hdf5.py
     deps:
     - path: data/pet_images
-      md5: 86736968c4c757aee0a0fa665d267985.dir
-      size: 16664989
-      nfiles: 42
+      md5: f8709a2ce36664c8644b34a20eded199.dir
+      size: 62498402
+      nfiles: 141
     - path: data/text_info/test.csv
-      md5: 6d649c2d88601852802306f2762f8cc6
-      size: 99
+      md5: 7997a4e2650b05561c82f92647ab3dcb
+      size: 438
     - path: data/text_info/train.csv
-      md5: cfa9d9e8c4ea3ca8b963983ec0698c6c
-      size: 981
+      md5: dacb306cd2913cba464040f1ee609cc4
+      size: 3193
     - path: data/text_info/val.csv
-      md5: b2138faaf504f684bda0ae70a77b19ae
-      size: 166
+      md5: 5592658adb0e4fb43691af2c24fb8d31
+      size: 1061
     outs:
     - path: data/datasets/test.hdf5
-      md5: bc5f95cdaff7ed6169aa8f118d077b36
-      size: 596144
+      md5: 5e882a4aebd217ea69c013f38c291956
+      size: 1967808
     - path: data/datasets/train.hdf5
-      md5: f8232bc1448c8c7dca903d042d7749b3
-      size: 6508544
+      md5: a5ade20becae1c4d58ca8d92ace63bc9
+      size: 15249152
     - path: data/datasets/val.hdf5
-      md5: f8e524591d48f889af53e084d703ee11
-      size: 1187840
+      md5: c55a6e742682a8fbbbb32e2e97f55c05
+      size: 4082688
+  train_model:
+    cmd: python src/stages/train_model.py
+    deps:
+    - path: data/datasets/test.hdf5
+      md5: 5e882a4aebd217ea69c013f38c291956
+      size: 1967808
+    - path: data/datasets/train.hdf5
+      md5: a5ade20becae1c4d58ca8d92ace63bc9
+      size: 15249152
+    - path: data/datasets/val.hdf5
+      md5: c55a6e742682a8fbbbb32e2e97f55c05
+      size: 4082688
+    - path: src/stages/train_model.py
+      md5: 31ddf7a80020ee5d6b7ee1f345a0d19f
+      size: 3275
+    params:
+      params.yaml:
+        augmentations:
+          image_size: 224
+          rotate_abs_angle: 25
+          noise_lower_bound: 10
+          noise_upper_bound: 30
+          dropout_p: 0.01
+          salt_and_pepper_p: 0.02
+          blur_lower_kernel_bound: 1
+          blur_upper_kernel_bound: 5
+          jpeg_compression_bounds:
+          - 50
+          - 80
+          motion_blur_bounds:
+          - 3
+          - 7
+          gaussian_blur_bounds:
+          - 0
+          - 3
+          color_multiplier:
+          - 0.7
+          - 1.5
+          contrast_bounds:
+          - 0.7
+          - 1.4
+          clahe_clip_limit:
+          - 0.1
+          - 4
+          rotate_probability: 0.5
+          arithmetic_probability: 0.5
+          blur_probability: 0.5
+          color_probability: 0.5
+          contrast_probability: 0.5
+        model:
+          output_vector_size: 64
+          triplet_loss_alpha: 1.0
+          pretrained_model_name: microsoft/resnet-18
+        trainer:
+          eval_steps: 30
+          train_batch_size: 8
+          val_batch_size: 8
+          epochs: 100
+          learning_rate: 0.001
+          weight_decay: 0.0015
+          save_steps: 400
+          fp16: true
+          gradient_accumulation_steps: 1
+          eval_accumulation_steps: 1
+          trainer_checkpoint: ''
+          output_folder: output
+          loss_function: cos
+    outs:
+    - path: output/model
+      md5: 5a73545f171bd90d5123fdd5c90e90b0.dir
+      size: 44928956
+      nfiles: 2

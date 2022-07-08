@@ -15,9 +15,10 @@ data:
   train_h5_file: "data/datasets/train.hdf5"
   val_h5_file: "data/datasets/val.hdf5"
   test_h5_file: "data/datasets/test.hdf5"
+  feature_extractor: "microsoft/resnet-18"
 
 augmentations:
-  image_size: 256
+  image_size: 224
   rotate_abs_angle: 25
   noise_lower_bound: 10
   noise_upper_bound: 30
@@ -38,3 +39,23 @@ augmentations:
   blur_probability: 0.5
   color_probability: 0.5
   contrast_probability: 0.5
+
+model:
+  output_vector_size: 64
+  triplet_loss_alpha: 1.0
+  pretrained_model_name: "microsoft/resnet-18"
+
+trainer:
+  eval_steps: 30
+  train_batch_size: 8
+  val_batch_size: 8
+  epochs: 100
+  learning_rate: 0.001
+  weight_decay : 0.0015
+  save_steps: 400
+  fp16: True
+  gradient_accumulation_steps: 1
+  eval_accumulation_steps: 1
+  trainer_checkpoint: ""
+  output_folder: "gs://pet_project/trainer_output/"
+  loss_function: "mse"

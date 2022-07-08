@@ -22,6 +22,7 @@ class DataConfig:
     train_h5_file: str
     val_h5_file: str
     test_h5_file: str
+    feature_extractor: str
 
 @dataclass
 class AugmentationsConfig:
@@ -46,12 +47,39 @@ class AugmentationsConfig:
     color_probability: float
     contrast_probability: float
 
+
+@dataclass
+class ModelConfig:
+    output_vector_size: int
+    triplet_loss_alpha: float
+    pretrained_model_name: str
+
+
+@dataclass
+class TrainerConfig:
+    eval_steps: int
+    train_batch_size: int
+    val_batch_size: int
+    epochs: int
+    learning_rate: float
+    weight_decay: float
+    save_steps: int
+    fp16: bool
+    gradient_accumulation_steps: int
+    eval_accumulation_steps: int
+    trainer_checkpoint: str
+    output_folder: str
+    loss_function: str
+
+
 @dataclass
 class BaseConfig:
     random_seed: int
     cloud_storage: CloudStorageConfig
     data: DataConfig
     augmentations: AugmentationsConfig
+    model: ModelConfig
+    trainer: TrainerConfig
 
 
 def __dataclass_from_dict(klass, d):

@@ -6,12 +6,13 @@ from collections import Counter
 import random
 import pandas as pd
 from imgaug.augmenters import Augmenter
+from transformers import AutoFeatureExtractor
 import random
 
 
 class ImageDataset(Dataset):
 
-    def __init__(self, dataset_path: str, augmenter: Augmenter, use_augmenter=False, ):
+    def __init__(self, dataset_path: str, augmenter: Augmenter, feature_extractor_name: str, use_augmenter=False, ):
         """
         :param images_folder_path:
         :param image_paths: list with relative image paths: should be class_folder/image_name
@@ -33,6 +34,7 @@ class ImageDataset(Dataset):
 
         self.unique_classes = set(self.classes.values())
         self.single_classes = [item[0] for item in Counter(self.classes.values()).most_common() if item[1] < 2]
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(feature_extractor_name)
 
     def __len__(self):
         return len(self.paths)
@@ -58,6 +60,9 @@ class ImageDataset(Dataset):
         if self.use_augmenter:
             anchor_image = self.augment(anchor_image)
             negative_image = self.augment(negative_image)
+        positive_image = self.feature_extractor(images=positive_image, return_tensors="pt")["pixel_values"].squeeze(0)
+        anchor_image = self.feature_extractor(images=anchor_image, return_tensors="pt")["pixel_values"].squeeze(0)
+        negative_image = self.feature_extractor(images=negative_image, return_tensors="pt")["pixel_values"].squeeze(0)
         return { "positive": positive_image, "anchor": anchor_image, "negative": negative_image }
 
     def __del__(self):

@@ -12,6 +12,8 @@ stages:
       - "data/text_info/train.csv"
       - "data/text_info/val.csv"
       - "data/text_info/test.csv"
+    params:
+      - data
   convert_images_to_h5:
     cmd: python src/stages/convert_images_to_hdf5.py
     deps:
@@ -23,3 +25,16 @@ stages:
       - "data/datasets/train.hdf5"
       - "data/datasets/val.hdf5"
       - "data/datasets/test.hdf5"
+  train_model:
+    cmd: python src/stages/train_model.py
+    deps:
+      - "data/datasets/train.hdf5"
+      - "data/datasets/val.hdf5"
+      - "data/datasets/test.hdf5"
+      - "src/stages/train_model.py"
+    outs:
+      - "output/model"
+    params:
+      - trainer
+      - model
+      - augmentations
