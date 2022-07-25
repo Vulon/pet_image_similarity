@@ -4,11 +4,11 @@ import tqdm
 import pandas as pd
 import sys
 import dvc.api
-sys.path.append(os.environ["DVC_ROOT"])
-from src.config import get_config
 
 
-def _get_storage_blobs(project_root:str, credentials_path: str, bucket_name: str, cloud_images_folder: str, project_name: str):
+def _get_storage_blobs(
+        project_root:str, credentials_path: str, bucket_name: str, cloud_images_folder: str, project_name: str
+    ) -> tuple[list[storage.Blob], storage.Client]:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(project_root, credentials_path)
     storage_client = storage.Client(project_name)
     bucket = storage_client.bucket(bucket_name)
@@ -30,6 +30,8 @@ def _download_images(blobs,images_folder: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     project_root = os.environ["DVC_ROOT"]
+    sys.path.append(project_root)
+    from src.config import get_config
     params = dvc.api.params_show()
     config = get_config(params)
     images_folder = os.path.join(project_root, config.data.local_images_folder)
