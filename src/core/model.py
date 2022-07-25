@@ -59,3 +59,16 @@ class ResNet(nn.Module):
 
         loss = self.criterion(positive_vector, anchor_vector, negative_vector)
         return (loss, [positive_vector, anchor_vector, negative_vector])
+
+
+class ResNetScore(nn.Module):
+    def __init__(self, output_vector_size: int):
+        super().__init__()
+        model = ResNetForImageClassification.from_pretrained("microsoft/resnet-18")
+        self.model = model.resnet
+        self.decoder = nn.Linear(512, output_vector_size)
+
+    def forward(self, image) -> torch.Tensor:
+        output = self.model(image).pooler_output.squeeze(2).squeeze(2)
+        output = self.decoder(output)
+        return output

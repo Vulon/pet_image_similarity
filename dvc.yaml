@@ -34,7 +34,26 @@ stages:
       - "src/stages/train_model.py"
     outs:
       - "output/model"
+      - "output/tensorboard/latest"
     params:
       - trainer
       - model
       - augmentations
+    metrics:
+      - output/val_metrics.json
+
+  visualize:
+    cmd: python src/stages/visualize_predictions.py
+    deps:
+      - "output/model"
+      - "data/datasets/test.hdf5"
+    outs:
+      - "data/test_visualization.png"
+
+  upload_files:
+    cmd: python src/stages/upload_files.py
+    deps:
+      - "output/model"
+      - "output/tensorboard/latest"
+    params:
+      - cloud_storage

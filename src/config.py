@@ -8,6 +8,8 @@ class CloudStorageConfig:
     credentials: str
     bucket_name: str
     images_folder: str
+    project_name: str
+    output_folder: str
 
 @dataclass
 class DataConfig:
@@ -70,6 +72,9 @@ class TrainerConfig:
     trainer_checkpoint: str
     output_folder: str
     loss_function: str
+    experiment_name: str
+    compute_test_metrics: bool
+    tensorboard_log: str
 
 
 @dataclass

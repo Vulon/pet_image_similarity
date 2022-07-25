@@ -20,6 +20,7 @@ pandas = "*"
 imgaug = "*"
 h5py = "*"
 transformers = "*"
+onnx = "*"
 
 [dev-packages]
 ipykernel = "*"

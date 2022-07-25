@@ -9,30 +9,10 @@ from src.config import get_config
 from src.core.image_processing import create_train_sequence
 from src.core.dataset import ImageDataset
 from src.core.model import SwinModel, TripletLoss, ResNet
-
-
-def cos(a: torch.Tensor, b: torch.Tensor):
-    loss = torch.nn.CosineSimilarity()(a, b)
-    loss = torch.mean(torch.abs(loss))
-    return loss
-
-
-def create_compute_metrics_function():
-
-
-    def compute_metrics(evalPrediction):
-        positive_vector, anchor_vector, negative_vector = evalPrediction.predictions
-
-        positive_mse = (positive_vector - anchor_vector)** 2
-        negative_mse = (negative_vector - anchor_vector)** 2
-        mask = negative_mse > positive_mse
-        return {
-            "accuracy": np.mean(mask), "positive mse" : np.mean(positive_mse), "negative_mse": np.mean(negative_mse),
-            "positive cos" : cos(torch.tensor(positive_mse).float(), torch.tensor(anchor_vector).float()),
-            "negative cos" : cos(torch.tensor(anchor_vector).float(), torch.tensor(negative_vector).float())
-        }
-
-    return compute_metrics
+from datetime import datetime as dt
+import json
+import shutil
+from src.core.metrics import cos, create_compute_metrics_function
 
 
 if __name__ == "__main__":
@@ -44,6 +24,7 @@ if __name__ == "__main__":
 
     train_dataset = ImageDataset(os.path.join(project_root, config.data.train_h5_file), sequence, config.data.feature_extractor, True)
     val_dataset = ImageDataset(os.path.join(project_root, config.data.val_h5_file), sequence, config.data.feature_extractor, False)
+    test_dataset = ImageDataset(os.path.join(project_root, config.data.test_h5_file), sequence, config.data.feature_extractor, False)
 
     if config.trainer.loss_function == "cos":
         loss_function = cos
@@ -51,6 +32,7 @@ if __name__ == "__main__":
         loss_function = torch.nn.MSELoss()
 
     model = ResNet(config.model.output_vector_size, TripletLoss(config.model.triplet_loss_alpha, loss_function))
+    tensorboard_logdir = os.path.join(project_root, config.trainer.output_folder, "tensorboard", f"{config.trainer.experiment_name}_{dt.now().strftime('%Y_%m_%d__%H_%M')}")
 
     args = TrainingArguments(
         output_dir= os.path.join(project_root, config.trainer.output_folder) ,
@@ -66,7 +48,8 @@ if __name__ == "__main__":
         fp16 = config.trainer.fp16,
         gradient_accumulation_steps = config.trainer.gradient_accumulation_steps,
         eval_accumulation_steps = config.trainer.eval_accumulation_steps,
-        logging_strategy = "epoch"
+        logging_strategy = "epoch",
+        logging_dir = tensorboard_logdir
     )
 
     trainer = Trainer(
@@ -77,6 +60,17 @@ if __name__ == "__main__":
         compute_metrics=create_compute_metrics_function()
     )
     trainer.train( config.trainer.trainer_checkpoint if config.trainer.trainer_checkpoint else None )
+
+    shutil.copytree(tensorboard_logdir, os.path.join(project_root, config.trainer.tensorboard_log))
+
+    val_metrics = trainer.evaluate(val_dataset)
+
+    with open("output/val_metrics.json", 'w') as file:
+        json.dump(val_metrics, file)
+    if config.trainer.compute_test_metrics:
+        test_metrics = trainer.evaluate(test_dataset)
+        with open("output/test_metrics.json", 'w') as file:
+            json.dump(test_metrics, file)
 
     trainer.save_model( os.path.join(project_root, config.trainer.output_folder, "model") )
 

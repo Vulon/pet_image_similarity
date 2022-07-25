@@ -3,6 +3,9 @@ cloud_storage:
   credentials: keys/google.json
   bucket_name: pet_project
   images_folder: "pet_images"
+  project_name: "nlp-masters-project"
+  output_folder: "trainer_output"
+
 data:
   local_images_folder: "data/pet_images"
   classes_text_file: "data/text_info/classes.csv"
@@ -57,5 +60,8 @@ trainer:
   gradient_accumulation_steps: 1
   eval_accumulation_steps: 1
   trainer_checkpoint: ""
-  output_folder: "gs://pet_project/trainer_output/"
+  output_folder: "output"
   loss_function: "mse"
+  experiment_name: "resnet_18_baseline"
+  compute_test_metrics: False
+  tensorboard_log: "output/tensorboard/latest"

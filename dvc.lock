@@ -4,18 +4,18 @@ stages:
     cmd: python src/stages/download_images.py
     outs:
     - path: data/pet_images
-      md5: f8709a2ce36664c8644b34a20eded199.dir
-      size: 62498402
-      nfiles: 141
+      md5: bf51677a64428a5dfa8360e2b290036b.dir
+      size: 113476945
+      nfiles: 254
     - path: data/text_info/classes.csv
-      md5: b41b55d5515fa4e0c5da8ec29e6dfbd5
-      size: 4668
+      md5: d1e5e6d57d350c572973af34a043f36c
+      size: 8171
   split_data:
     cmd: python src/stages/split_data.py
     deps:
     - path: data/text_info/classes.csv
-      md5: b41b55d5515fa4e0c5da8ec29e6dfbd5
-      size: 4668
+      md5: d1e5e6d57d350c572973af34a043f36c
+      size: 8171
     params:
       params.yaml:
         data:
@@ -33,55 +33,55 @@ stages:
           feature_extractor: microsoft/resnet-18
     outs:
     - path: data/text_info/test.csv
-      md5: 7997a4e2650b05561c82f92647ab3dcb
-      size: 438
+      md5: 44bc50792a2bf13a31c297cf4a6a0880
+      size: 805
     - path: data/text_info/train.csv
-      md5: dacb306cd2913cba464040f1ee609cc4
-      size: 3193
+      md5: 4406d53e6e1f78154dc8d9d42b3015c4
+      size: 5779
     - path: data/text_info/val.csv
-      md5: 5592658adb0e4fb43691af2c24fb8d31
-      size: 1061
+      md5: 50e9f439493f4cfd5bd9b33c150cc500
+      size: 1611
   convert_images_to_h5:
     cmd: python src/stages/convert_images_to_hdf5.py
     deps:
     - path: data/pet_images
-      md5: f8709a2ce36664c8644b34a20eded199.dir
-      size: 62498402
-      nfiles: 141
+      md5: bf51677a64428a5dfa8360e2b290036b.dir
+      size: 113476945
+      nfiles: 254
     - path: data/text_info/test.csv
-      md5: 7997a4e2650b05561c82f92647ab3dcb
-      size: 438
+      md5: 44bc50792a2bf13a31c297cf4a6a0880
+      size: 805
     - path: data/text_info/train.csv
-      md5: dacb306cd2913cba464040f1ee609cc4
-      size: 3193
+      md5: 4406d53e6e1f78154dc8d9d42b3015c4
+      size: 5779
     - path: data/text_info/val.csv
-      md5: 5592658adb0e4fb43691af2c24fb8d31
-      size: 1061
+      md5: 50e9f439493f4cfd5bd9b33c150cc500
+      size: 1611
     outs:
     - path: data/datasets/test.hdf5
-      md5: 5e882a4aebd217ea69c013f38c291956
-      size: 1967808
+      md5: 21f13338222f06bfcfb529f4569c3f2e
+      size: 3629056
     - path: data/datasets/train.hdf5
-      md5: a5ade20becae1c4d58ca8d92ace63bc9
-      size: 15249152
+      md5: 5982aa4cd1013e136eb1bcb0e4e350c7
+      size: 27329792
     - path: data/datasets/val.hdf5
-      md5: c55a6e742682a8fbbbb32e2e97f55c05
-      size: 4082688
+      md5: 5c4f89008d4159dc0c2454d420db06f9
+      size: 7400448
   train_model:
     cmd: python src/stages/train_model.py
     deps:
     - path: data/datasets/test.hdf5
-      md5: 5e882a4aebd217ea69c013f38c291956
-      size: 1967808
+      md5: 21f13338222f06bfcfb529f4569c3f2e
+      size: 3629056
     - path: data/datasets/train.hdf5
-      md5: a5ade20becae1c4d58ca8d92ace63bc9
-      size: 15249152
+      md5: 5982aa4cd1013e136eb1bcb0e4e350c7
+      size: 27329792
     - path: data/datasets/val.hdf5
-      md5: c55a6e742682a8fbbbb32e2e97f55c05
-      size: 4082688
+      md5: 5c4f89008d4159dc0c2454d420db06f9
+      size: 7400448
     - path: src/stages/train_model.py
-      md5: 31ddf7a80020ee5d6b7ee1f345a0d19f
-      size: 3275
+      md5: 2dd3b626e60cff75a8f74ce851af7a57
+      size: 3320
     params:
       params.yaml:
         augmentations:
@@ -133,9 +133,52 @@ stages:
           eval_accumulation_steps: 1
           trainer_checkpoint: ''
           output_folder: output
-          loss_function: cos
+          loss_function: mse
+          experiment_name: resnet_18_baseline
+          compute_test_metrics: false
+          tensorboard_log: output/tensorboard/latest
     outs:
     - path: output/model
-      md5: 5a73545f171bd90d5123fdd5c90e90b0.dir
-      size: 44928956
+      md5: 2937b169050d7057bc3bc2f3602a537c.dir
+      size: 44929020
       nfiles: 2
+    - path: output/tensorboard/latest
+      md5: f4b73ba4205cea6ca32b06e3d96683ba.dir
+      size: 79089
+      nfiles: 2
+    - path: output/val_metrics.json
+      md5: 4264a9bb7002113762104c58b4be6fc0
+      size: 325
+  upload_files:
+    cmd: python src/stages/upload_files.py
+    deps:
+    - path: output/model
+      md5: 2937b169050d7057bc3bc2f3602a537c.dir
+      size: 44929020
+      nfiles: 2
+    - path: output/tensorboard/latest
+      md5: f4b73ba4205cea6ca32b06e3d96683ba.dir
+      size: 79089
+      nfiles: 2
+    params:
+      params.yaml:
+        cloud_storage:
+          credentials: keys/google.json
+          bucket_name: pet_project
+          images_folder: pet_images
+          project_name: nlp-masters-project
+          output_folder: trainer_output
+  visualize:
+    cmd: python src/stages/visualize_predictions.py
+    deps:
+    - path: data/datasets/test.hdf5
+      md5: 21f13338222f06bfcfb529f4569c3f2e
+      size: 3629056
+    - path: output/model
+      md5: 2937b169050d7057bc3bc2f3602a537c.dir
+      size: 44929020
+      nfiles: 2
+    outs:
+    - path: data/test_visualization.png
+      md5: 1d327682ac38db784c595d2fed7bb0a9
+      size: 2396
