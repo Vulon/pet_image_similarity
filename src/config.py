@@ -94,9 +94,22 @@ def __dataclass_from_dict(klass, d):
     except:
         return d # Not a dataclass field
 
-def get_config(yaml_dict: dict, yaml_filepath: str = None) -> BaseConfig:
-    if yaml_filepath is not None:
-        with open(yaml_filepath, 'r') as file:
-            yaml_dict = yaml.safe_load(file)
-    config = __dataclass_from_dict(BaseConfig, yaml_dict)
+# def get_config(yaml_dict: dict, yaml_filepath: str = None) -> BaseConfig:
+#     if yaml_filepath is not None:
+#         with open(yaml_filepath, 'r') as file:
+#             yaml_dict = yaml.safe_load(file)
+#     config = __dataclass_from_dict(BaseConfig, yaml_dict)
+#     return config
+
+
+def get_config_from_dvc() -> BaseConfig:
+    import dvc.api
+    params = dvc.api.params_show()
+    config = __dataclass_from_dict(BaseConfig, params)
     return config
+
+def get_config_from_yaml(yaml_path: str) -> BaseConfig:
+    with open(yaml_path, 'r') as file:
+        yaml_dict = yaml.safe_load(file)
+        config = __dataclass_from_dict(BaseConfig, yaml_dict)
+        return config
