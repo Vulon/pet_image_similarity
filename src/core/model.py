@@ -1,26 +1,35 @@
-from transformers import AutoFeatureExtractor, SwinForImageClassification, ResNetForImageClassification
-from PIL import Image
 import requests
 import torch
 import torch.nn as nn
+from PIL import Image
+from transformers import (
+    AutoFeatureExtractor,
+    ResNetForImageClassification,
+    SwinForImageClassification,
+)
 
 
 class TripletLoss(nn.Module):
-
     def __init__(self, alpha, loss_function):
         super(TripletLoss, self).__init__()
         self.alpha = alpha
         self.loss_function = loss_function
 
     def forward(self, positive_vector, anchor_vector, negative_vector):
-        loss = self.loss_function(positive_vector, anchor_vector) - self.loss_function(anchor_vector, negative_vector) + self.alpha
+        loss = (
+            self.loss_function(positive_vector, anchor_vector)
+            - self.loss_function(anchor_vector, negative_vector)
+            + self.alpha
+        )
         return torch.clip(loss, min=0)
 
 
 class SwinModel(nn.Module):
     def __init__(self, output_vector_size: int, criterion: nn.Module):
         super().__init__()
-        model = SwinForImageClassification.from_pretrained("microsoft/swin-tiny-patch4-window7-224")
+        model = SwinForImageClassification.from_pretrained(
+            "microsoft/swin-tiny-patch4-window7-224"
+        )
         self.model = model.swin
         self.decoder = nn.Linear(768, output_vector_size)
         self.criterion = criterion
@@ -30,7 +39,7 @@ class SwinModel(nn.Module):
         output = self.decoder(output)
         return output
 
-    def forward(self, positive, anchor, negative, **kwargs ):
+    def forward(self, positive, anchor, negative, **kwargs):
         positive_vector = self.single_forward(positive)
         anchor_vector = self.single_forward(anchor)
         negative_vector = self.single_forward(negative)
@@ -52,7 +61,7 @@ class ResNet(nn.Module):
         output = self.decoder(output)
         return output
 
-    def forward(self, positive, anchor, negative, **kwargs ):
+    def forward(self, positive, anchor, negative, **kwargs):
         positive_vector = self.single_forward(positive)
         anchor_vector = self.single_forward(anchor)
         negative_vector = self.single_forward(negative)

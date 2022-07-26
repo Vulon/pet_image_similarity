@@ -1,17 +1,22 @@
-import h5py
-from torch.utils.data import Dataset
 import os
-from collections import Counter
 import random
+from collections import Counter
+
+import h5py
 import pandas as pd
 from imgaug.augmenters import Augmenter
+from torch.utils.data import Dataset
 from transformers import AutoFeatureExtractor
-import random
 
 
 class ImageDataset(Dataset):
-
-    def __init__(self, dataset_path: str, augmenter: Augmenter, feature_extractor_name: str, use_augmenter=False, ):
+    def __init__(
+        self,
+        dataset_path: str,
+        augmenter: Augmenter,
+        feature_extractor_name: str,
+        use_augmenter=False,
+    ):
         """
         :param images_folder_path:
         :param image_paths: list with relative image paths: should be class_folder/image_name
@@ -32,8 +37,14 @@ class ImageDataset(Dataset):
             self.paths.append(path)
 
         self.unique_classes = set(self.classes.values())
-        self.single_classes = [item[0] for item in Counter(self.classes.values()).most_common() if item[1] < 2]
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(feature_extractor_name)
+        self.single_classes = [
+            item[0]
+            for item in Counter(self.classes.values()).most_common()
+            if item[1] < 2
+        ]
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+            feature_extractor_name
+        )
 
     def __len__(self):
         return len(self.paths)
@@ -45,24 +56,42 @@ class ImageDataset(Dataset):
         anchor_path = self.paths[index]
         anchor_class = self.classes[anchor_path]
         anchor_image = self.file[anchor_path][:]
-        negative_class = random.choice( [cls for cls in self.unique_classes if cls != anchor_class] )
+        negative_class = random.choice(
+            [cls for cls in self.unique_classes if cls != anchor_class]
+        )
         negative_path = random.choice(self.paths_by_classes[negative_class])
         negative_image = self.file[negative_path][:]
 
         if anchor_class in self.single_classes:
             positive_image = self.augment(anchor_image)
         else:
-            positive_path = random.choice([item for item in self.paths_by_classes[anchor_class] if item != anchor_path])
+            positive_path = random.choice(
+                [
+                    item
+                    for item in self.paths_by_classes[anchor_class]
+                    if item != anchor_path
+                ]
+            )
             positive_image = self.file[positive_path][:]
             if self.use_augmenter:
                 positive_image = self.augment(positive_image)
         if self.use_augmenter:
             anchor_image = self.augment(anchor_image)
             negative_image = self.augment(negative_image)
-        positive_image = self.feature_extractor(images=positive_image, return_tensors="pt")["pixel_values"].squeeze(0)
-        anchor_image = self.feature_extractor(images=anchor_image, return_tensors="pt")["pixel_values"].squeeze(0)
-        negative_image = self.feature_extractor(images=negative_image, return_tensors="pt")["pixel_values"].squeeze(0)
-        return { "positive": positive_image, "anchor": anchor_image, "negative": negative_image }
+        positive_image = self.feature_extractor(
+            images=positive_image, return_tensors="pt"
+        )["pixel_values"].squeeze(0)
+        anchor_image = self.feature_extractor(images=anchor_image, return_tensors="pt")[
+            "pixel_values"
+        ].squeeze(0)
+        negative_image = self.feature_extractor(
+            images=negative_image, return_tensors="pt"
+        )["pixel_values"].squeeze(0)
+        return {
+            "positive": positive_image,
+            "anchor": anchor_image,
+            "negative": negative_image,
+        }
 
     def __del__(self):
         self.file.close()

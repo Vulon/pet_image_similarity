@@ -1,16 +1,18 @@
-from collections import Counter
 import os
-import tqdm
-import pandas as pd
 import sys
+from collections import Counter
+
 import dvc.api
-
-
+import pandas as pd
+import tqdm
 
 
 def _split_classes(
-        classes_list: list[str], train_fracture: float, val_fracture: float, test_fracture: float
-    ) -> tuple[list[str], list[str], list[str]]:
+    classes_list: list[str],
+    train_fracture: float,
+    val_fracture: float,
+    test_fracture: float,
+) -> tuple[list[str], list[str], list[str]]:
     classes = Counter(classes_list).most_common()
     total_count = len(classes_list)
     train_fracture = train_fracture / (train_fracture + val_fracture + test_fracture)
@@ -35,20 +37,27 @@ def _split_classes(
 
 if __name__ == "__main__":
     project_root = os.environ["DVC_ROOT"]
-    sys.path.append(os.environ["DVC_ROOT"])
+    sys.path.append(project_root)
     from src.config import get_config_from_dvc
+
     config = get_config_from_dvc()
 
-    df = pd.read_csv( os.path.join(project_root, config.data.classes_text_file) )
+    df = pd.read_csv(os.path.join(project_root, config.data.classes_text_file))
 
     train_classes, val_classes, test_classes = _split_classes(
-        df['class'], config.data.train_fracture, config.data.val_fracture, config.data.test_fracture
+        df["class"],
+        config.data.train_fracture,
+        config.data.val_fracture,
+        config.data.test_fracture,
     )
-    train_df = df.loc[df['class'].isin(train_classes)]
-    val_df = df.loc[df['class'].isin(val_classes)]
-    test_df = df.loc[df['class'].isin(test_classes)]
+    train_df = df.loc[df["class"].isin(train_classes)]
+    val_df = df.loc[df["class"].isin(val_classes)]
+    test_df = df.loc[df["class"].isin(test_classes)]
 
-    train_df.to_csv(os.path.join(project_root, config.data.train_classes_file), index=False)
+    train_df.to_csv(
+        os.path.join(project_root, config.data.train_classes_file), index=False
+    )
     val_df.to_csv(os.path.join(project_root, config.data.val_classes_file), index=False)
-    test_df.to_csv(os.path.join(project_root, config.data.test_classes_file), index=False)
-
+    test_df.to_csv(
+        os.path.join(project_root, config.data.test_classes_file), index=False
+    )

@@ -1,0 +1,5 @@
+[tool.isort]
+profile = "black"
+
+[settings]
+known_third_party = ["PIL", "cv2", "dvc", "google", "h5py", "imgaug", "matplotlib", "numpy", "onnx", "pandas", "requests", "torch", "tqdm", "transformers", "yaml"]

@@ -1,15 +1,22 @@
-from google.cloud import storage
 import os
-import tqdm
-import pandas as pd
 import sys
+
 import dvc.api
+import pandas as pd
+import tqdm
+from google.cloud import storage
 
 
 def _get_storage_blobs(
-        project_root:str, credentials_path: str, bucket_name: str, cloud_images_folder: str, project_name: str
-    ) -> tuple[list[storage.Blob], storage.Client]:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(project_root, credentials_path)
+    project_root: str,
+    credentials_path: str,
+    bucket_name: str,
+    cloud_images_folder: str,
+    project_name: str,
+) -> tuple[list[storage.Blob], storage.Client]:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
+        project_root, credentials_path
+    )
     storage_client = storage.Client(project_name)
     bucket = storage_client.bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=cloud_images_folder + "/")
@@ -22,7 +29,7 @@ def _parse_blob_path(path: str) -> tuple[str, str]:
     return image_class, image_name
 
 
-def _create_paths_dataframe(blobs: list[storage.Blob])-> pd.DataFrame:
+def _create_paths_dataframe(blobs: list[storage.Blob]) -> pd.DataFrame:
     df = []
     for blob in blobs:
         image_class, image_name = _parse_blob_path(blob.name)
@@ -45,10 +52,19 @@ if __name__ == "__main__":
 
     config = get_config_from_dvc()
     images_folder = os.path.join(project_root, config.data.local_images_folder)
-    blobs, storage_client = _get_storage_blobs(project_root, config.cloud_storage.credentials, config.cloud_storage.bucket_name, config.cloud_storage.images_folder, config.cloud_storage.project_name)
+    blobs, storage_client = _get_storage_blobs(
+        project_root,
+        config.cloud_storage.credentials,
+        config.cloud_storage.bucket_name,
+        config.cloud_storage.images_folder,
+        config.cloud_storage.project_name,
+    )
     df = _create_paths_dataframe(blobs)
     _download_images(blobs, os.path.join(project_root, config.data.local_images_folder))
 
-    os.makedirs( os.path.join(project_root, os.path.dirname(config.data.classes_text_file)), exist_ok=True )
+    os.makedirs(
+        os.path.join(project_root, os.path.dirname(config.data.classes_text_file)),
+        exist_ok=True,
+    )
     df.to_csv(os.path.join(project_root, config.data.classes_text_file), index=False)
     storage_client.close()

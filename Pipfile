@@ -25,6 +25,10 @@ onnx = "*"
 [dev-packages]
 ipykernel = "*"
 notebook = "*"
+isort = "*"
+black = "*"
+pre-commit = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.10"

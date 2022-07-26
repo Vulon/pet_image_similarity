@@ -1,5 +1,6 @@
-from dataclasses import dataclass
 import dataclasses
+from dataclasses import dataclass
+
 import yaml
 
 
@@ -10,6 +11,7 @@ class CloudStorageConfig:
     images_folder: str
     project_name: str
     output_folder: str
+
 
 @dataclass
 class DataConfig:
@@ -25,6 +27,7 @@ class DataConfig:
     val_h5_file: str
     test_h5_file: str
     feature_extractor: str
+
 
 @dataclass
 class AugmentationsConfig:
@@ -89,10 +92,11 @@ class BaseConfig:
 
 def __dataclass_from_dict(klass, d):
     try:
-        fieldtypes = {f.name:f.type for f in dataclasses.fields(klass)}
-        return klass(**{f:__dataclass_from_dict(fieldtypes[f],d[f]) for f in d})
+        fieldtypes = {f.name: f.type for f in dataclasses.fields(klass)}
+        return klass(**{f: __dataclass_from_dict(fieldtypes[f], d[f]) for f in d})
     except:
-        return d # Not a dataclass field
+        return d  # Not a dataclass field
+
 
 # def get_config(yaml_dict: dict, yaml_filepath: str = None) -> BaseConfig:
 #     if yaml_filepath is not None:
@@ -104,12 +108,14 @@ def __dataclass_from_dict(klass, d):
 
 def get_config_from_dvc() -> BaseConfig:
     import dvc.api
+
     params = dvc.api.params_show()
     config = __dataclass_from_dict(BaseConfig, params)
     return config
 
+
 def get_config_from_yaml(yaml_path: str) -> BaseConfig:
-    with open(yaml_path, 'r') as file:
+    with open(yaml_path, "r") as file:
         yaml_dict = yaml.safe_load(file)
         config = __dataclass_from_dict(BaseConfig, yaml_dict)
         return config
