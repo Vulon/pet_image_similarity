@@ -12,7 +12,7 @@ import json
 import shutil
 from datetime import datetime as dt
 
-from src.config import get_config
+from src.config import get_config_from_dvc
 from src.core.dataset import ImageDataset
 from src.core.image_processing import create_train_sequence
 from src.core.metrics import cos, create_compute_metrics_function
@@ -20,10 +20,9 @@ from src.core.model import ResNet, SwinModel, TripletLoss
 
 if __name__ == "__main__":
     project_root = os.environ["DVC_ROOT"]
-    params = dvc.api.params_show()
-    config = get_config(params)
+    config = get_config_from_dvc()
 
-    sequence = create_train_sequence(config.augmentations)
+    sequence = create_train_sequence(config.augmentations, config.random_seed)
 
     train_dataset = ImageDataset(
         os.path.join(project_root, config.data.train_h5_file),

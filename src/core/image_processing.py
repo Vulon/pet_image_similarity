@@ -1,8 +1,14 @@
 import numpy as np
 from imgaug import augmenters as iaa
 from PIL import Image
+from transformers import AutoFeatureExtractor
 
 from src.config import AugmentationsConfig
+
+
+def create_feature_extractor(feature_extractor_name: str):
+    feature_extractor = AutoFeatureExtractor.from_pretrained(feature_extractor_name)
+    return feature_extractor
 
 
 def create_crop_sequence(

@@ -17,12 +17,22 @@ class UnitTest(TestCase):
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "wb") as fp:
+            print("Saved image", output_path)
             image.save(fp)
         return image
 
+    def test_format_key(self):
+        from src.core.h5py_tools import format_key
+
+        self.assertEqual("cat_1|image1.png", format_key("cat_1/image1.png"))
+        self.assertEqual("cat_1|image1.png", format_key("cat_1\\image1.png"))
+        self.assertEqual(
+            "some_folder|cat_1|image1.png", format_key("some_folder/cat_1\\image1.png")
+        )
+
     def test_prepare_h5py_for_dataset(self):
+        from src.core.h5py_tools import format_key, prepare_h5py_for_dataset
         from src.core.image_processing import create_crop_sequence
-        from src.stages.convert_images_to_hdf5 import prepare_h5py_for_dataset
 
         output_folder = tempfile.mkdtemp()
         images_folder = tempfile.mkdtemp()
@@ -44,19 +54,21 @@ class UnitTest(TestCase):
                 for path in images_df["path"]
             }
             output_path = os.path.join(output_folder, "test.h5py")
+            print("Output path", output_path)
             prepare_h5py_for_dataset(
                 output_path, images_folder, images_df, crop_sequence
             )
             with h5py.File(output_path, "r") as file:
-                for path in images_data.keys():
-                    self.assertIn(path, file.keys())
+                for index, row in images_df.iterrows():
+                    path = row["path"]
+                    self.assertIn(format_key(path), file.keys())
                     self.assertEqual(
-                        file[path].attrs["class"],
-                        images_df.loc[images_df["path"] == path, "class"].item(),
+                        file[format_key(path)].attrs["class"],
+                        row["class"],
                     )
 
                     data = np.array(images_data[path]).flatten().tolist()
-                    actual_data = np.array(file[path][:]).flatten().tolist()
+                    actual_data = np.array(file[format_key(path)][:]).flatten().tolist()
                     self.assertEqual(data, actual_data)
 
         finally:
