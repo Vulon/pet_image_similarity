@@ -1,14 +1,21 @@
 import numpy as np
 import torch
+from torch import nn
 
 
-def cos(a: torch.Tensor, b: torch.Tensor):
-    loss = torch.nn.CosineSimilarity()(a, b)
-    loss = torch.mean(torch.abs(loss))
-    return loss
+class CosLoss(nn.Module):
+    def _cos(self, a: torch.Tensor, b: torch.Tensor):
+        loss = torch.nn.CosineSimilarity()(a, b)
+        loss = torch.mean(torch.abs(loss))
+        return loss
+
+    def forward(self, first: torch.Tensor, second: torch.Tensor):
+        return self._cos(first, second)
 
 
 def create_compute_metrics_function():
+    cos = CosLoss()
+
     def compute_metrics(evalPrediction):
         positive_vector, anchor_vector, negative_vector = evalPrediction.predictions
 
@@ -29,3 +36,27 @@ def create_compute_metrics_function():
         }
 
     return compute_metrics
+
+
+class TripletLoss(nn.Module):
+    def __init__(self, alpha, loss_function):
+        super(TripletLoss, self).__init__()
+        self.alpha = alpha
+        self.loss_function = loss_function
+
+    def forward(self, positive_vector, anchor_vector, negative_vector):
+        loss = (
+            self.loss_function(positive_vector, anchor_vector)
+            - self.loss_function(anchor_vector, negative_vector)
+            + self.alpha
+        )
+        return torch.clip(loss, min=0)
+
+
+def get_base_loss_function(base_loss_function_name: str) -> nn.Module:
+    if base_loss_function_name == "cos":
+        loss_function = CosLoss()
+    elif base_loss_function_name == "mse":
+        loss_function = torch.nn.MSELoss()
+
+    return loss_function

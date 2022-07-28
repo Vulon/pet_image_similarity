@@ -81,6 +81,11 @@ class TrainerConfig:
 
 
 @dataclass
+class ScoreConfig:
+    onnx_output_filepath: str
+
+
+@dataclass
 class BaseConfig:
     random_seed: int
     cloud_storage: CloudStorageConfig
@@ -88,6 +93,7 @@ class BaseConfig:
     augmentations: AugmentationsConfig
     model: ModelConfig
     trainer: TrainerConfig
+    score: ScoreConfig
 
 
 def __dataclass_from_dict(klass, d):

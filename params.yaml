@@ -65,3 +65,6 @@ trainer:
   experiment_name: "resnet_18_baseline"
   compute_test_metrics: False
   tensorboard_log: "output/tensorboard/latest"
+
+score:
+  onnx_output_filepath: "model.onnx"

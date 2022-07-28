@@ -1,25 +1,19 @@
 import os
 import sys
-from datetime import datetime
 
 import cv2
 import dvc.api
 import h5py
 import matplotlib.pyplot as plt
-import pandas as pd
 import torch
-import tqdm
 
 project_root = os.environ["DVC_ROOT"]
 sys.path.append(project_root)
-import numpy as np
-from imgaug import augmenters as iaa
 from transformers import AutoFeatureExtractor
 
-from src.config import get_config
-from src.core.dataset import ImageDataset
+from src.config import get_config_from_dvc
 from src.core.image_processing import create_train_sequence
-from src.core.metrics import cos
+from src.core.metrics import get_base_loss_function
 from src.core.model import ResNetScore
 
 
@@ -71,18 +65,13 @@ def create_similarity_plot(table: list, loss_function, h5py_file: h5py.File):
 
 
 if __name__ == "__main__":
-    params = dvc.api.params_show()
-    config = get_config(params)
-    sequence = create_train_sequence(config.augmentations)
+    config = get_config_from_dvc()
+    sequence = create_train_sequence(config.augmentations, config.random_seed)
     model = ResNetScore(config.model.output_vector_size)
     feature_extractor = AutoFeatureExtractor.from_pretrained(
         config.model.pretrained_model_name
     )
-
-    if config.trainer.loss_function == "cos":
-        loss_function = cos
-    elif config.trainer.loss_function == "mse":
-        loss_function = torch.nn.MSELoss()
+    loss_function = get_base_loss_function(config.trainer.loss_function)
 
     test_file = h5py.File(os.path.join(project_root, config.data.test_h5_file))
     test_file.close()

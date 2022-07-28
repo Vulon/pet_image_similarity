@@ -15,8 +15,34 @@ from datetime import datetime as dt
 from src.config import get_config_from_dvc
 from src.core.dataset import ImageDataset
 from src.core.image_processing import create_train_sequence
-from src.core.metrics import cos, create_compute_metrics_function
-from src.core.model import ResNet, SwinModel, TripletLoss
+from src.core.metrics import (
+    TripletLoss,
+    create_compute_metrics_function,
+    get_base_loss_function,
+)
+from src.core.model import create_train_model
+
+
+def save_output_files(
+    tensorboard_run_folder: str,
+    last_tensorboard_logs_folder: str,
+    trainer: Trainer,
+    model_folder: str,
+    metrics_folder: str,
+    val_metrics: dict,
+    test_metrics: dict,
+):
+    shutil.copytree(tensorboard_run_folder, last_tensorboard_logs_folder)
+    trainer.save_model(model_folder)
+
+    if val_metrics is not None:
+        with open(os.path.join(metrics_folder, "val_metrics.json"), "w") as file:
+            json.dump(val_metrics, file)
+
+    if test_metrics is not None:
+        with open(os.path.join(metrics_folder, "test_metrics.json"), "w") as file:
+            json.dump(test_metrics, file)
+
 
 if __name__ == "__main__":
     project_root = os.environ["DVC_ROOT"]
@@ -42,16 +68,14 @@ if __name__ == "__main__":
         config.data.feature_extractor,
         False,
     )
+    loss_function = get_base_loss_function(config.trainer.loss_function)
 
-    if config.trainer.loss_function == "cos":
-        loss_function = cos
-    elif config.trainer.loss_function == "mse":
-        loss_function = torch.nn.MSELoss()
-
-    model = ResNet(
+    model = create_train_model(
+        config.model.pretrained_model_name,
         config.model.output_vector_size,
         TripletLoss(config.model.triplet_loss_alpha, loss_function),
     )
+
     tensorboard_logdir = os.path.join(
         project_root,
         config.trainer.output_folder,
@@ -87,20 +111,18 @@ if __name__ == "__main__":
     trainer.train(
         config.trainer.trainer_checkpoint if config.trainer.trainer_checkpoint else None
     )
-
-    shutil.copytree(
-        tensorboard_logdir, os.path.join(project_root, config.trainer.tensorboard_log)
-    )
-
     val_metrics = trainer.evaluate(val_dataset)
-
-    with open("output/val_metrics.json", "w") as file:
-        json.dump(val_metrics, file)
     if config.trainer.compute_test_metrics:
         test_metrics = trainer.evaluate(test_dataset)
-        with open("output/test_metrics.json", "w") as file:
-            json.dump(test_metrics, file)
+    else:
+        test_metrics = None
 
-    trainer.save_model(
-        os.path.join(project_root, config.trainer.output_folder, "model")
+    save_output_files(
+        tensorboard_logdir,
+        os.path.join(project_root, config.trainer.tensorboard_log),
+        trainer,
+        os.path.join(project_root, config.trainer.output_folder, "model"),
+        os.path.join(project_root, config.trainer.output_folder),
+        val_metrics,
+        test_metrics,
     )
