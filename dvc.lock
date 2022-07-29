@@ -31,6 +31,7 @@ stages:
           val_h5_file: data/datasets/val.hdf5
           test_h5_file: data/datasets/test.hdf5
           feature_extractor: microsoft/resnet-18
+          visualization_output_path: data/test_visualization.png
     outs:
     - path: data/text_info/test.csv
       md5: 44bc50792a2bf13a31c297cf4a6a0880
@@ -59,29 +60,29 @@ stages:
       size: 1611
     outs:
     - path: data/datasets/test.hdf5
-      md5: 21f13338222f06bfcfb529f4569c3f2e
+      md5: 6e5c78684108792a2ce9e26c3fe60692
       size: 3629056
     - path: data/datasets/train.hdf5
-      md5: 5982aa4cd1013e136eb1bcb0e4e350c7
+      md5: 76bd8c0d3eb4988ca15183ac2a4b3673
       size: 27329792
     - path: data/datasets/val.hdf5
-      md5: 5c4f89008d4159dc0c2454d420db06f9
+      md5: bc8de94f0744eb5d7731f169f7dbeddb
       size: 7400448
   train_model:
     cmd: python src/stages/train_model.py
     deps:
     - path: data/datasets/test.hdf5
-      md5: 21f13338222f06bfcfb529f4569c3f2e
+      md5: 6e5c78684108792a2ce9e26c3fe60692
       size: 3629056
     - path: data/datasets/train.hdf5
-      md5: 5982aa4cd1013e136eb1bcb0e4e350c7
+      md5: 76bd8c0d3eb4988ca15183ac2a4b3673
       size: 27329792
     - path: data/datasets/val.hdf5
-      md5: 5c4f89008d4159dc0c2454d420db06f9
+      md5: bc8de94f0744eb5d7731f169f7dbeddb
       size: 7400448
     - path: src/stages/train_model.py
-      md5: 2dd3b626e60cff75a8f74ce851af7a57
-      size: 3320
+      md5: 73f26861cf2d1b394bfc1aee4175f17c
+      size: 4242
     params:
       params.yaml:
         augmentations:
@@ -139,27 +140,33 @@ stages:
           tensorboard_log: output/tensorboard/latest
     outs:
     - path: output/model
-      md5: 2937b169050d7057bc3bc2f3602a537c.dir
+      md5: 83987c1af01b8640c6d49dd48b8e04ac.dir
       size: 44929020
       nfiles: 2
     - path: output/tensorboard/latest
-      md5: f4b73ba4205cea6ca32b06e3d96683ba.dir
-      size: 79089
-      nfiles: 2
+      md5: b0cf585435af0fd2d26665109c75d857.dir
+      size: 79808
+      nfiles: 3
     - path: output/val_metrics.json
-      md5: 4264a9bb7002113762104c58b4be6fc0
-      size: 325
+      md5: eaedf015bd158af9adf96def816b1aea
+      size: 306
   upload_files:
     cmd: python src/stages/upload_files.py
     deps:
+    - path: data/test_visualization.png
+      md5: 1d327682ac38db784c595d2fed7bb0a9
+      size: 2396
     - path: output/model
-      md5: 2937b169050d7057bc3bc2f3602a537c.dir
+      md5: 83987c1af01b8640c6d49dd48b8e04ac.dir
       size: 44929020
       nfiles: 2
+    - path: output/model.onnx
+      md5: 26690d4897cdd4f9619c448808142c75
+      size: 11246004
     - path: output/tensorboard/latest
-      md5: f4b73ba4205cea6ca32b06e3d96683ba.dir
-      size: 79089
-      nfiles: 2
+      md5: b0cf585435af0fd2d26665109c75d857.dir
+      size: 79808
+      nfiles: 3
     params:
       params.yaml:
         cloud_storage:
@@ -172,13 +179,31 @@ stages:
     cmd: python src/stages/visualize_predictions.py
     deps:
     - path: data/datasets/test.hdf5
-      md5: 21f13338222f06bfcfb529f4569c3f2e
+      md5: 6e5c78684108792a2ce9e26c3fe60692
       size: 3629056
     - path: output/model
-      md5: 2937b169050d7057bc3bc2f3602a537c.dir
+      md5: 83987c1af01b8640c6d49dd48b8e04ac.dir
       size: 44929020
       nfiles: 2
     outs:
     - path: data/test_visualization.png
       md5: 1d327682ac38db784c595d2fed7bb0a9
       size: 2396
+  run_tests:
+    cmd: python -m unittest discover
+  prepare_environment:
+    cmd:
+    - pre-commit install
+    - black .
+    - isort .
+  export_onnx:
+    cmd: python src/stages/export_model_to_onnx.py
+    deps:
+    - path: output/model
+      md5: 83987c1af01b8640c6d49dd48b8e04ac.dir
+      size: 44929020
+      nfiles: 2
+    outs:
+    - path: output/model.onnx
+      md5: 26690d4897cdd4f9619c448808142c75
+      size: 11246004

@@ -14,7 +14,7 @@ from datetime import datetime as dt
 
 from src.config import get_config_from_dvc
 from src.core.dataset import ImageDataset
-from src.core.image_processing import create_train_sequence
+from src.core.image_processing import create_feature_extractor, create_train_sequence
 from src.core.metrics import (
     TripletLoss,
     create_compute_metrics_function,
@@ -49,23 +49,24 @@ if __name__ == "__main__":
     config = get_config_from_dvc()
 
     sequence = create_train_sequence(config.augmentations, config.random_seed)
+    feature_extractor = create_feature_extractor(config.data.feature_extractor)
 
     train_dataset = ImageDataset(
         os.path.join(project_root, config.data.train_h5_file),
         sequence,
-        config.data.feature_extractor,
+        feature_extractor,
         True,
     )
     val_dataset = ImageDataset(
         os.path.join(project_root, config.data.val_h5_file),
         sequence,
-        config.data.feature_extractor,
+        feature_extractor,
         False,
     )
     test_dataset = ImageDataset(
         os.path.join(project_root, config.data.test_h5_file),
         sequence,
-        config.data.feature_extractor,
+        feature_extractor,
         False,
     )
     loss_function = get_base_loss_function(config.trainer.loss_function)

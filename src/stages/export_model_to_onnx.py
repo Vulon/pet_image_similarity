@@ -1,13 +1,11 @@
 import os
 import shutil
+import sys
 import tempfile
 
 import onnx
 import torch
 from onnxruntime.quantization import quantize
-
-from src.config import get_config_from_dvc
-from src.core.model import create_score_model
 
 
 def create_dummy_input(image_size: int):
@@ -22,7 +20,7 @@ def export_onnx(model: torch.nn.Module, input_image_size: int, onnx_output_path:
             model,
             create_dummy_input(input_image_size),
             os.path.join(temp_folder, "model.onnx"),
-            verbose=True,
+            verbose=False,
             input_names=["image"],
             output_names=["vector"],
         )
@@ -36,11 +34,15 @@ def export_onnx(model: torch.nn.Module, input_image_size: int, onnx_output_path:
 
 
 if __name__ == "__main__":
+    project_root = os.environ["DVC_ROOT"]
+    sys.path.append(project_root)
+    from src.config import get_config_from_dvc
+    from src.core.model import create_score_model
+
     config = get_config_from_dvc()
 
     loss_function = torch.nn.MSELoss()
 
-    project_root = os.environ["DVC_ROOT"]
     input_model_path = os.path.join(
         project_root, config.trainer.output_folder, "model", "pytorch_model.bin"
     )

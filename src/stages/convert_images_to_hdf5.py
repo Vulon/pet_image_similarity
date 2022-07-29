@@ -3,11 +3,10 @@ import sys
 
 import pandas as pd
 
-from src.core.h5py_tools import prepare_h5py_for_dataset
-
 if __name__ == "__main__":
     sys.path.append(os.environ["DVC_ROOT"])
     from src.config import get_config_from_dvc
+    from src.core.h5py_tools import prepare_h5py_for_dataset
     from src.core.image_processing import create_crop_sequence
 
     project_root = os.environ["DVC_ROOT"]

@@ -19,6 +19,7 @@ data:
   val_h5_file: "data/datasets/val.hdf5"
   test_h5_file: "data/datasets/test.hdf5"
   feature_extractor: "microsoft/resnet-18"
+  visualization_output_path: "data/test_visualization.png"
 
 augmentations:
   image_size: 224

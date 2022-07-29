@@ -8,7 +8,7 @@ import tqdm
 from google.cloud import storage
 
 sys.path.append(os.environ["DVC_ROOT"])
-from src.config import get_config
+from src.config import get_config_from_dvc
 
 
 def upload_folder(
@@ -35,10 +35,19 @@ def upload_folder(
             blob.upload_from_filename(source_file_name)
 
 
+def upload_file(bucket, full_cloud_folder_path: str, local_file_path: str):
+    file_name = os.path.basename(local_file_path)
+    destination_blob_name = os.path.join(full_cloud_folder_path, file_name).replace(
+        "\\", "/"
+    )
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(local_file_path)
+
+
 if __name__ == "__main__":
     project_root = os.environ["DVC_ROOT"]
-    params = dvc.api.params_show()
-    config = get_config(params)
+
+    config = get_config_from_dvc()
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
         project_root, config.cloud_storage.credentials
     )
@@ -60,4 +69,19 @@ if __name__ == "__main__":
     )
     upload_folder(
         bucket, config.cloud_storage.output_folder, new_folder_name, local_logs_folder
+    )
+
+    local_plot_path = os.path.join(project_root, config.data.visualization_output_path)
+    upload_file(
+        bucket,
+        os.path.join(config.cloud_storage.output_folder, new_folder_name),
+        local_plot_path,
+    )
+    onnx_output_path = os.path.join(
+        project_root, config.trainer.output_folder, config.score.onnx_output_filepath
+    )
+    upload_file(
+        bucket,
+        os.path.join(config.cloud_storage.output_folder, new_folder_name),
+        onnx_output_path,
     )

@@ -67,7 +67,9 @@ def create_similarity_plot(table: list, loss_function, h5py_file: h5py.File):
 if __name__ == "__main__":
     config = get_config_from_dvc()
     sequence = create_train_sequence(config.augmentations, config.random_seed)
-    model = ResNetScore(config.model.output_vector_size)
+    model = ResNetScore(
+        config.model.output_vector_size, config.model.pretrained_model_name
+    )
     feature_extractor = AutoFeatureExtractor.from_pretrained(
         config.model.pretrained_model_name
     )
@@ -75,4 +77,5 @@ if __name__ == "__main__":
 
     test_file = h5py.File(os.path.join(project_root, config.data.test_h5_file))
     test_file.close()
-    plt.savefig(os.path.join(project_root, "data", "test_visualization.png"))
+
+    plt.savefig(os.path.join(project_root, config.data.visualization_output_path))

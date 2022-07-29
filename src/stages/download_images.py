@@ -59,6 +59,7 @@ if __name__ == "__main__":
         config.cloud_storage.images_folder,
         config.cloud_storage.project_name,
     )
+    blobs = list(blobs)
     df = _create_paths_dataframe(blobs)
     _download_images(blobs, os.path.join(project_root, config.data.local_images_folder))
 

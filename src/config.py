@@ -27,6 +27,7 @@ class DataConfig:
     val_h5_file: str
     test_h5_file: str
     feature_extractor: str
+    visualization_output_path: str
 
 
 @dataclass
